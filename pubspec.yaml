@@ -19,6 +19,8 @@ dependencies:
   table_calendar: ^3.0.9
   google_fonts: ^6.1.0
   connectivity_plus: ^5.0.2
+  firebase_core: ^4.7.0
+  cloud_firestore: ^6.3.0
 
 dev_dependencies:
   flutter_test:

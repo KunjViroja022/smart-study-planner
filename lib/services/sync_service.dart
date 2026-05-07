@@ -1,96 +1,76 @@
-import '../services/hive_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/subject.dart';
+import '../models/topic.dart';
+import '../models/study_session.dart';
+import 'hive_service.dart';
 
-/// Abstract sync service interface.
-/// Structured to support Firebase integration later.
-///
-/// To add Firebase sync:
-/// 1. Create a `FirebaseSyncService` that implements this interface
-/// 2. Replace `LocalSyncService` with `FirebaseSyncService` in main.dart
-/// 3. Implement the actual Firebase Firestore operations
 abstract class SyncService {
-  /// Sync all pending changes to remote.
   Future<void> syncToRemote();
-
-  /// Pull latest changes from remote.
   Future<void> syncFromRemote();
-
-  /// Check if there are pending sync operations.
-  bool hasPendingSync();
-
-  /// Get the count of pending operations.
-  int pendingSyncCount();
 }
 
-/// Local-only sync service (no-op implementation).
-/// This is used when Firebase is not configured.
-class LocalSyncService implements SyncService {
+/// Firebase Implementation for Cloud Sync
+class FirebaseSyncService implements SyncService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
   @override
   Future<void> syncToRemote() async {
-    // No-op: data is already stored locally in Hive.
-    // When Firebase is added, this will push pending changes.
+    try {
+      final subjects = HiveService.getAllSubjects();
+      final topics = HiveService.getAllTopics();
+      final sessions = HiveService.getAllSessions();
+
+      final batch = _db.batch();
+
+      // Push Subjects
+      for (final s in subjects) {
+        batch.set(_db.collection('subjects').doc(s.id), s.toMap());
+      }
+
+      // Push Topics
+      for (final t in topics) {
+        batch.set(_db.collection('topics').doc(t.id), t.toMap());
+      }
+
+      // Push Sessions
+      for (final s in sessions) {
+        batch.set(_db.collection('sessions').doc(s.id), s.toMap());
+      }
+
+      await batch.commit();
+      print('Successfully synced all local data to Firebase!');
+    } catch (e) {
+      print('Error syncing to Firebase: $e');
+    }
   }
 
   @override
   Future<void> syncFromRemote() async {
-    // No-op: all data is local.
-    // When Firebase is added, this will pull latest data.
-  }
+    try {
+      // 1. Fetch Subjects
+      final subjectSnapshot = await _db.collection('subjects').get();
+      for (final doc in subjectSnapshot.docs) {
+        await HiveService.saveSubject(Subject.fromMap(doc.data()));
+      }
 
-  @override
-  bool hasPendingSync() {
-    return HiveService.getPendingSyncOps().isNotEmpty;
-  }
+      // 2. Fetch Topics
+      final topicSnapshot = await _db.collection('topics').get();
+      for (final doc in topicSnapshot.docs) {
+        await HiveService.saveTopic(Topic.fromMap(doc.data()));
+      }
 
-  @override
-  int pendingSyncCount() {
-    return HiveService.getPendingSyncOps().length;
+      // 3. Fetch Sessions
+      final sessionSnapshot = await _db.collection('sessions').get();
+      for (final doc in sessionSnapshot.docs) {
+        await HiveService.saveSession(StudySession.fromMap(doc.data()));
+      }
+
+      print('Successfully fetched data from Firebase!');
+    } catch (e) {
+      print('Error fetching from Firebase: $e');
+    }
   }
 }
 
-// ─── FIREBASE IMPLEMENTATION (Future) ───────────────────────
-//
-// class FirebaseSyncService implements SyncService {
-//   @override
-//   Future<void> syncToRemote() async {
-//     final pendingOps = HiveService.getPendingSyncOps();
-//     for (final op in pendingOps) {
-//       final type = op['type'] as String;
-//       final collection = op['collection'] as String;
-//       final data = op['data'] as Map<String, dynamic>;
-//       final id = op['id'] as String;
-//
-//       switch (type) {
-//         case 'create':
-//         case 'update':
-//           await FirebaseFirestore.instance
-//               .collection(collection)
-//               .doc(id)
-//               .set(data);
-//           break;
-//         case 'delete':
-//           await FirebaseFirestore.instance
-//               .collection(collection)
-//               .doc(id)
-//               .delete();
-//           break;
-//       }
-//     }
-//     await HiveService.clearSyncQueue();
-//   }
-//
-//   @override
-//   Future<void> syncFromRemote() async {
-//     // Pull subjects, topics, sessions from Firestore
-//     // and update local Hive storage
-//   }
-//
-//   @override
-//   bool hasPendingSync() {
-//     return HiveService.getPendingSyncOps().isNotEmpty;
-//   }
-//
-//   @override
-//   int pendingSyncCount() {
-//     return HiveService.getPendingSyncOps().length;
-//   }
-// }
+/// A global instance to easily call sync functions.
+final firebaseSync = FirebaseSyncService();

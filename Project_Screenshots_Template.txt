@@ -1,0 +1,54 @@
+SMART STUDY PLANNER & EXAM PREPARATION TRACKER
+Project Screenshot Documentation
+
+[INSTRUCTIONS: Copy all the text below into Microsoft Word. Then, delete the "[INSERT SCREENSHOT HERE]" brackets and paste your actual screenshots in those spots.]
+
+==================================================
+
+1. Dashboard Screen
+Description: Provides a high-level overview of total subjects, completed topics, pending tasks, daily study progress, and suggests the next topic to study based on a priority algorithm.
+
+[INSERT DASHBOARD SCREENSHOT HERE]
+
+==================================================
+
+2. Subject Management Screen
+Description: Allows users to add, edit, and manage their subjects. Includes visual completion bars for each subject showing progress.
+
+[INSERT SUBJECT MANAGEMENT SCREENSHOT HERE]
+
+==================================================
+
+3. Topic Management Screen
+Description: Allows users to add topics under specific subjects, assign estimated study times, and easily toggle completion status (Not Started / In Progress / Completed).
+
+[INSERT TOPIC MANAGEMENT SCREENSHOT HERE]
+
+==================================================
+
+4. Study Scheduling Screen
+Description: A calendar and timeline view to schedule study sessions with dates, times, and durations. Prevent overlaps and track daily goals.
+
+[INSERT STUDY SCHEDULING SCREENSHOT HERE]
+
+==================================================
+
+5. Progress Tracking Screen
+Description: Detailed analytics screen showing topic status distribution (Donut Chart) and subject-wise completion rates to easily identify subjects needing attention.
+
+[INSERT PROGRESS SCREENSHOT HERE]
+
+==================================================
+
+6. Search & Filter Screen
+Description: Quickly find topics using real-time text search and filter by subject or completion status.
+
+[INSERT SEARCH & FILTER SCREENSHOT HERE]
+
+==================================================
+
+Project Details:
+- Framework: Flutter
+- State Management: Provider
+- Local Database: Hive (Offline-First functionality)
+- Visuals: fl_chart & table_calendar

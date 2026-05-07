@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../providers/subject_provider.dart';
 import '../providers/topic_provider.dart';
 import '../providers/session_provider.dart';
+import '../services/sync_service.dart';
 import '../utils/constants.dart';
 import '../utils/helpers.dart';
 import '../widgets/stats_card.dart';
@@ -29,6 +30,24 @@ class DashboardScreen extends StatelessWidget {
               floating: true,
               pinned: false,
               backgroundColor: Colors.transparent,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.cloud_upload_rounded, color: AppColors.primary),
+                  tooltip: 'Sync to Cloud',
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Syncing data to Firebase...')),
+                    );
+                    await firebaseSync.syncToRemote();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Sync complete!')),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
                 title: Column(
